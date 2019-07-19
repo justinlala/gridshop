@@ -8,24 +8,12 @@ const { createFilePath } = require(`gatsby-source-filesystem`)
 exports.createPages = async ({ graphql, actions }) => {
   const { createPage } = actions
 
-  const blogPost = path.resolve(`./src/templates/blog-post.js`)
+  const collectionPage = path.resolve(`./src/templates/collectionPage.js`)
   const result = await graphql(
     `
       {
-        allMarkdownRemark(
-          sort: { fields: [frontmatter___date], order: DESC }
-          limit: 1000
-        ) {
-          edges {
-            node {
-              fields {
-                slug
-              }
-              frontmatter {
-                title
-              }
-            }
-          }
+        allProduct {
+          distinct(field: s_vendor____text)
         }
       }
     `
@@ -36,20 +24,16 @@ exports.createPages = async ({ graphql, actions }) => {
   }
 
   // Create blog posts pages.
-  const posts = result.data.allMarkdownRemark.edges
+  const collections = result.data.allProduct.distinct
 
-  posts.forEach((post, index) => {
-    const previous = index === posts.length - 1 ? null : posts[index + 1].node
-    const next = index === 0 ? null : posts[index - 1].node
+  collections.forEach((collection, index) => {
 
     createPage({
-      path: post.node.fields.slug,
-      component: blogPost,
+      path: `company/${collection}`,
+      component: collectionPage,
       context: {
-        slug: post.node.fields.slug,
-        previous,
-        next,
-      },
+        slug: collection
+      }
     })
   })
 }

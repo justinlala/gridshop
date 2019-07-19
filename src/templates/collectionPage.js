@@ -6,7 +6,7 @@ import Layout from "../components/layout"
 import SEO from "../components/seo"
 import { rhythm } from "../utils/typography"
 
-class BlogIndex extends React.Component {
+class CollectionPage extends React.Component {
   render() {
     const { data } = this.props
     const siteTitle = data.site.siteMetadata.title
@@ -14,7 +14,6 @@ class BlogIndex extends React.Component {
 
     return (
       <Layout location={this.props.location} title={siteTitle}>
-        <SEO title="All posts" />
         <div
           style={{
             display: 'flex',
@@ -40,15 +39,14 @@ class BlogIndex extends React.Component {
                   }}
                 >
                   <a style={{ boxShadow: `none` }} href={node.link} target="_blank">
-                    <Link
+                    <div
                       style={{
                         fontSize: '0.5em',
                         marginBottom: '10px'
                       }}
-                      to={`/company/${node["s_vendor"]["_text"]}`}
                     >
                       {node["s_vendor"]["_text"]}
-                    </Link>
+                    </div>
                     <img src={node.images[0]}/>
                     {title}
                   </a>
@@ -63,27 +61,28 @@ class BlogIndex extends React.Component {
   }
 }
 
-export default BlogIndex
+export default CollectionPage
 
 export const pageQuery = graphql`
-  query {
+  query ProductsByCompany($slug: String!) {
     site {
       siteMetadata {
         title
+        author
       }
     }
-    allProduct {
-     edges {
-       node {
-         id
-         images
-         link
-         title
-         s_vendor {
-           _text
+    allProduct(filter: {s_vendor: {_text: {eq: $slug}}}) {
+      edges {
+        node {
+          id
+          images
+          link
+          title
+          s_vendor {
+            _text
+          }
          }
-        }
-      }
+       }
     }
   }
 `
