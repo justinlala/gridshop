@@ -56,16 +56,20 @@ class Layout extends React.Component {
         style={{
           marginLeft: `auto`,
           marginRight: `auto`,
-          maxWidth: rhythm(24),
+          maxWidth: "80%",
           padding: `${rhythm(1.5)} ${rhythm(3 / 4)}`,
         }}
       >
         <header>{header}</header>
         <main>{children}</main>
-        <footer>
-          © {new Date().getFullYear()}, Built with
+        <footer
+          style={{
+            marginTop: "20px"
+          }}
+        >
+          © {new Date().getFullYear()}, Built from
           {` `}
-          <a href="https://www.gatsbyjs.org">Gatsby</a>
+          <a href="https://CPGD.XYZ">CPGD.XYZ</a>
         </footer>
       </div>
     )

@@ -15,7 +15,6 @@ class BlogIndex extends React.Component {
     return (
       <Layout location={this.props.location} title={siteTitle}>
         <SEO title="All posts" />
-        <Bio />
         <div
           style={{
             display: 'flex',
@@ -25,6 +24,8 @@ class BlogIndex extends React.Component {
           }}
         >
           {products.map(({ node }) => {
+
+            if(node.images[0] === "#") return;
             const title = node.title
             return (
               <div
@@ -38,9 +39,17 @@ class BlogIndex extends React.Component {
                     marginBottom: rhythm(1 / 4),
                   }}
                 >
-                  <a style={{ boxShadow: `none` }} href={node.link}>
-                    {title}
+                  <a style={{ boxShadow: `none` }} href={node.link} target="_blank">
+                    <div
+                      style={{
+                        fontSize: '0.5em',
+                        marginBottom: '10px'
+                      }}
+                    >
+                      {node["s_vendor"]["_text"]}
+                    </div>
                     <img src={node.images[0]}/>
+                    {title}
                   </a>
                 </h3>
               </div>
@@ -69,6 +78,9 @@ export const pageQuery = graphql`
          images
          link
          title
+         s_vendor {
+           _text
+         }
         }
       }
     }

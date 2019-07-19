@@ -58,7 +58,7 @@ exports.createPages = async ({ graphql, actions }) => {
 exports.sourceNodes = async ({ boundActionCreators }) => {
   const { createNode } = boundActionCreators;
 
-  const getCompanyUrls = () => htmlToJson.request('https://www.cpgd.xyz/all?91c78504_page=0', {
+  const getCompanyUrls = (pageNumber) => htmlToJson.request(`https://www.cpgd.xyz/all?91c78504_page=${pageNumber}`, {
     'links': ['a.link-block-7', function ($a) {
       return $a.attr('href');
     }]
@@ -66,7 +66,7 @@ exports.sourceNodes = async ({ boundActionCreators }) => {
     return result;
   });
 
-  const urls = await getCompanyUrls();
+  const urls = await Promise.all([1,2].map((pageNumber) => getCompanyUrls(pageNumber)));
 
   async function fetchProducts(url) {
     try {
@@ -76,12 +76,19 @@ exports.sourceNodes = async ({ boundActionCreators }) => {
       return;
     }
   }
-
-  const results = await Promise.all(urls.links.slice(1,9).map((url) => fetchProducts(url)));
+  console.log(urls);
+  const results = await Promise.all(urls.flatMap((url) => url.links).map((url) => fetchProducts(url)));
 
 
   const jsonData = results.flatMap((result) => {
-    if(result) return convert.xml2json(result.data, {compact: true});
+    if(result) {
+      try {
+        return convert.xml2json(result.data, {compact: true});
+      }
+      catch {
+        return;
+      }
+    }
   })
 
   const jsonProducts = jsonData.filter(n => n).flatMap((data) => {
@@ -91,6 +98,7 @@ exports.sourceNodes = async ({ boundActionCreators }) => {
   // map into these results and create nodes
   jsonProducts.map( async (product, i) => {
 
+    if(!product) return;
     const getImage = () => htmlToJson.parse(product.summary["_cdata"], {
       'images': ['img', function ($img) {
         return $img.attr('src');
@@ -101,8 +109,9 @@ exports.sourceNodes = async ({ boundActionCreators }) => {
 
     const imageResult = await getImage();
     // Create your node object
-    const productNode = {
+    const productNode = {...product,
       // Required fields
+
       id: `${i}`,
       parent: `__SOURCE__`,
       internal: {
